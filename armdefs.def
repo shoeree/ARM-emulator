@@ -1,0 +1,184 @@
+/* Project "ARMed" Definitions file
+ * for Conditions, Opcodes, Instruction types,
+ * boolean definition, and defined constants
+ * 
+ * Author: 	Sterling Hoeree
+ * ID:		3090300043 ZJU-SFU
+ * 
+ * Date Created: 2011/04/15
+ * Date Modified:2011/06/17
+ *                                                          */
+#ifndef ARMDEFS_H
+#define ARMDEFS_H
+
+// Define Boolean Type
+#ifndef BOOLEAN
+#define BOOLEAN
+typedef enum {
+	false = 0,
+	true = 1
+} bool;
+#endif // BOOLEAN
+
+// Define byte, hword, word, dword types
+// *** Note that these definitions are not absolute; 
+// for some, a "word" may be 32 bits rather than 16, etc.
+// These are mearly conventions for this program. ***
+#ifndef DATA_TYPES
+#define DATA_TYPES
+typedef unsigned char byte;			// 8 bits
+typedef unsigned short hword;		// 16 bits
+typedef unsigned long word;			// 32 bits
+typedef unsigned long long dword;	// 64 bits
+#endif // DATA_TYPES
+
+// Constant Definitions
+#ifndef ARMVM_CONSTANTS
+#define ARMVM_CONSTANTS
+// ---------
+#define M1KB 1024		// 1 Kilobyte 	*Page Size*
+#define M4KB 4096		// 4 Kilobytes	
+#define M1GB 1073741824	// 1 Gigabyte
+#define M4GB 4294967296	// 4 Gigabytes
+
+#define UNDEFINED_INSTRUCTION 0x06000000 // Undefined Instruction code
+			// 0000 0110 0000 0000 0000 0000 0000 0000
+#define DEFAULT_MAIN_MEMORY 1024		// Default 1024 words = 4KB
+#define DEFAULT_STACK_MEMORY 256		// Default 256  words = 1KB
+#define DEFAULT_NUMBER_OF_TOKENS 6
+#define DEFAULT_TOKEN_LENGTH 20
+#define LINE_MAX 80
+#define DEFAULT_TABLE_SIZE 47
+// Below are definitions for word constants that are supposed to only
+// have 12-bits maximum, with 4 bits reserved for special values:
+#define CONST_12_ERR  0x0000F000	// 12-bit constant error
+#define CONST_12_NAN  0x00004000	// 12-bit constant Not-a-Number (NaN)
+#define CONST_12_OVRF 0x00001000	// 12-bit constant Overflow
+#define CONST_12_UDRF 0x00002000	// 12-bit constant Underflow
+#define CONST_12_SIGN 0x00000800	// 12-bit constant sign bit set
+// 24-bit constant definitions (for addressing):
+#define CONST_24_ERR  0xF0000000	// 24-bit constant error
+#define CONST_24_NAN  0x40000000	// 24-bit constant Not-a-Number (NaN)
+#define CONST_24_OVRF 0x10000000	// 24-bit constant Overflow
+#define CONST_24_UDRF 0x20000000	// 24-bit constant Underflow
+#define CONST_24_SIGN 0x00800000	// 24-bit constant sign bit set
+// ---------
+#endif // ARMVM_CONSTANTS
+
+// Registers
+#ifndef ARMVM_REGS
+#define ARMVM_NREGS 16
+#define REG_A1_OFFSET -1
+#define REG_V1_OFFSET 3
+#define ARMVM_REGS \
+X(A1) \
+X(A2) \
+X(A3) \
+X(A4) \
+X(V1) \
+X(V2) \
+X(V3) \
+X(V4) \
+X(V5) \
+X(V6) \
+X(V7) \
+X(V8) \
+X(IP) \
+X(SP) \
+X(LR) \
+X(PC)
+#endif // ARMVM_REGS
+
+#define X(a) a,
+typedef enum {
+	INVALID_REG = -1,
+	ARMVM_REGS
+} regn;
+#undef X
+
+// Conditions
+#ifndef ARMVM_CONDITIONS
+#define ARMVM_CONDITIONS \
+X(EQ) \
+X(NE) \
+X(HS) \
+X(LO) \
+X(MI) \
+X(PL) \
+X(VS) \
+X(VC) \
+X(HI) \
+X(LS) \
+X(GE) \
+X(LT) \
+X(GT) \
+X(LE) \
+X(AL) \
+X(NV)
+#endif // ARMVM_CONDITIONS
+
+// Condition Flags
+#ifndef ARMVM_COND_FLAGS
+#define ARMVM_COND_FLAGS
+#define ZF 0
+#define CF 1
+#define NF 2
+#define VF 3
+#endif // ARMVM_COND_FLAGS
+// Condition Codes
+#define X(a) a,
+typedef enum {
+	INVALID_COND	= -1, // Invalid
+	ARMVM_CONDITIONS
+} cond;
+#undef X
+
+// Opcodes
+#ifndef ARMVM_OPCODES
+#define ARMVM_OPCODES
+#define DP_OFFSET 0		// Code of 1st DP opcode
+#define DT_OFFSET 24	// "	"	"  DT opcode
+#define BR_OFFSET 28	// "	"	"  BR opcode
+typedef enum {
+//	Name		   Parameters		Description
+// ----------------------------------------------------
+	NOP = -1,	// 					Not an operation
+	// DP
+	AND =  0,	// r0, r1, r2		r0 <- r1 & r2		
+	EOR =  1,	// "	"	"		r0 <- r1 ^ r2
+	SUB =  2,	// "	"	"		r0 <- r1 - r2
+	RSB =  3,	// "	"	"		r0 <- r2 - r1
+	ADD =  4,	// "	"	"		r0 <- r1 + r2
+	ADC =  5,	// "	"	"		r0 <- r1 + r2 + CARRY FLAG
+	SBC =  6,	// "	"	"		r0 <- r1 - r2 - CARRY FLAG
+	RSC =  7,	// "	"	"		r0 <- r2 - r1 - CARRY FLAG
+	TST =  8,	// r0, ARG			
+	TEQ =  9,	// "	"	"
+	CMP = 10,	// "	"	"		Update flags using addition of r0 + ARG
+	CMN = 11,	// "	"	"		Update flags using subtraction of r0 - ARG
+	ORR = 12,	// r0, r1, r2		r0 <- r1 | r2
+	MOV = 13,	// r0, r1			r0 <- r1
+	BIC = 14,	// r0, r1, ARG
+	MVN = 15,	// r0, r1			r0 <- ~r1
+	// DT
+	LDR = 24,	// r0, MEM			Load MEM into register r0
+	STR = 25,	// r0, MEM			Store r0 in MEM
+//	SWP = 26,	// r0, r1			Swap data in r0 and r1
+	// BR
+	B 	= 28,	// #CONSTANT		Branch to address in #CONSTANT (can use a 'label')
+	BL	= 29	// " "	"			"	"	"	"	"	"	"	"	"	"	"	" and set LR=PC
+} opcode;
+#endif // ARMVM_OPCODES
+
+// Instruction types
+#ifndef ARMVM_INSTR_TYPES
+#define ARMVM_INSTR_TYPES
+typedef enum {
+	INVALID_ITYPE	= -1, // Invalid type
+	DP 				=  0, // Data Processing type
+	DT 				=  1, // Data Transfer type
+	BR 				=  2  // Branch type
+} itype;
+#endif // ARMVM_INSTR_TYPES
+
+#endif // ARMDEFS_H

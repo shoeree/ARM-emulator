@@ -1,0 +1,6 @@
+*.o
+*.exe
+*.bin
+PG/*
+armvm
+
